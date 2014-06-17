@@ -9,7 +9,7 @@ Usage
 
 On your NodeJS app
 ------------------
-In your ExpressJS application init script, add the following before setting any other route:
+In your ExpressJS application init script, add the following before setting any other route. You will notice that you are free to create token content as you like.
 
 ```javascript
 var bearer = require('bearer');
