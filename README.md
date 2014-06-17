@@ -82,6 +82,8 @@ When you get back response containing token similar to:
 
 You can use it in subsequential requests as part of your HTTP Header (dont forget the "Bearer " prefix)
 
+```
 Authorization=Bearer U2FsdGVkX1+xSwd3f8WPCmM4WDOuZB1jblNArZEP/iKUu/ZF3+i9RZxGZuR5wnaMxw2wUjf4KbNQMjLderxDSTro2W9r7dbadltV+W1PbX3KTm5hbz4XYCdS7E4rlEALaKIBNyFyaBF9j8R+OpHEnddehW6pOAMfRmPPMqpfe20iIqdm3og+KZEU75qPXKZN04+XZGJFKpv557km0iF2KIBsYl4BrdeinJE4fU5wjvZMdv/C8u/hfRfFZZAGv9RC9TfEdD1HDvEynvtzwESuxdiqCOu6KPM4QoFTLHEo8Aj40WyoYEMFYPJOMI2fycej9SR5CcR/RJJFU6Q+IfKJ6cZIijpPnF6oYDqI/XbQYBV2fCEO3oTJeNxhaYpZaVBbRqV+AKasIGMonBK3rSeiHlPu9wLkfa6vZbDPqhKmZrAE6JrO8oaJJqogbu4TXu37Jw2qRLd0Z9IdZQT9EjjJPUJTfSljbM5YS3mLTfn+pjQ=
+```
 
 
