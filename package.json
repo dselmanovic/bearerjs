@@ -1,6 +1,6 @@
 {
   "name": "bearer",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "description": "Bearer authentication module using token and Authorization HTTP header",
   "main": "bearer.js",
   "scripts": {
@@ -16,5 +16,8 @@
     "Token"
   ],
   "author": "Demir Selmanovic",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "node-cryptojs-aes":"~0.4.0"
+  }
 }
