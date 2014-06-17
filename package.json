@@ -1,10 +1,14 @@
 {
   "name": "bearer",
-  "version": "0.0.1",
-  "description": "Bearer authentication module",
+  "version": "0.0.4",
+  "description": "Bearer authentication module using token and Authorization HTTP header",
   "main": "bearer.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dselmanovic/bearerjs.git"
   },
   "keywords": [
     "Bearer",
