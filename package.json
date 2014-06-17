@@ -1,0 +1,16 @@
+{
+  "name": "bearer",
+  "version": "0.0.1",
+  "description": "Bearer authentication module",
+  "main": "bearer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Bearer",
+    "Authentication",
+    "Token"
+  ],
+  "author": "Demir Selmanovic",
+  "license": "ISC"
+}
