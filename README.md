@@ -7,6 +7,7 @@ Usage
 =====
 In your ExpressJS application init script, add the following before setting any other route:
 
+```javascript
 var bearer = require('bearer');
 var app = express();
 bearer({
@@ -48,3 +49,4 @@ bearer({
         {url:'/users', method:'get'}
     ]
 });
+```
