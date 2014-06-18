@@ -1,6 +1,6 @@
 {
   "name": "bearer",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "Bearer authentication module using token and Authorization HTTP header",
   "main": "bearer.js",
   "scripts": {
@@ -13,6 +13,7 @@
   "keywords": [
     "Bearer",
     "Authentication",
+    "Authorization",
     "Token"
   ],
   "author": "Demir Selmanovic",
