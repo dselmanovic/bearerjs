@@ -53,45 +53,52 @@ function bearerJS(settings) {
                 serverKey:settings.serverKey
             });
         }
+        var isAuthenticated=false;
+        var errorMessage="";
         if (checkUrl(req.url,req.method.toLowerCase(),settings.secureRoutes)){
             if (token){
                 var tokenValid=settings.validateToken(req,token);
                 if (!tokenValid){
-                    res.statusCode=401;
-                    res.statusText="Token expired";
-                    res.send();
+                    errorMessage="Token expored";
                 }else //Authorized request
                 {
-                    if (settings.afterAuthorized){
-                        var canProceed=settings.afterAuthorized(token);
+                    if (settings.onTokenValid){
+                        var canProceed=settings.onTokenValid(token);
                         if (!canProceed){
-                            res.statusCode=401;
-                            res.statusText="User disabled";
-                            res.send();
+                            errorMessage="User disabled";
                         }else
                         {
-                            req.authInfo=token;
-                            req.isAuthenticated=true;
-                            next();
+                            isAuthenticated=true;
                         }
                     }else
                     {
-                        req.authInfo=token;
-                        req.isAuthenticated=true;
-                        next();
+                        isAuthenticated=true;
                     }
                 }
             }else
             {
-                res.statusCode=401;
-                res.statusText="Invalid token";
-                res.send();
+                errorMessage="Invalid token";
             }
         }else
         {
-            req.authInfo=token;
+            isAuthenticated=true;
+        }
+
+        if (isAuthenticated){
+            req.authToken=token;
             req.isAuthenticated=true;
+            if (settings.onAuthorized){
+                settings.onAuthorized(req,token);
+            }
             next();
+        }else
+        {
+            res.statusCode=401;
+            res.statusText=errorMessage;
+            if (settings.onUnauthorized){
+                settings.onUnauthorized(req,token);
+            }
+            res.send();
         }
     });
 }
