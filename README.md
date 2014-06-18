@@ -14,6 +14,8 @@ In your ExpressJS application init script, add the following before setting any 
 ```javascript
 var bearer = require('bearer');
 var app = express();
+//Setup authentication
+//This should be done before all routes are configured to assure that authorization will be first to execute
 bearer({
     //Make sure to pass in the app (express) object so we can set routes
     app:app,
@@ -22,6 +24,7 @@ bearer({
     tokenUrl:'/token', //Call this URL to get your token. Accepts only POST method
     createToken:function(req){
         //If your user is not valid just return "underfined" from this method.
+        //Your token will be added to req object and you can use it from any method later
         var username=req.body.username;
         var userValid=true; //You are aware that this is where you check username/password in your DB, right!?
         if (userValid) return({
@@ -43,11 +46,17 @@ bearer({
         }
         return false;
     },
-    afterAuthorized:function(token){
+    onTokenValid:function(token){
         //This is in case you would like to check user account status in DB each time he attempts to do something.
         //Doing this will affect your performance but its your choice if you really need it
         //Returning false from this method will reject user even if his token is OK
         return true;
+    },
+    onAuthenticated: function(req, token){
+        console.log("this will be executed if request is OK");
+    },
+    onUnauthorized: function(req, token){
+        console.log("this will be executed if request fails authentication");
     },
     secureRoutes:[
         {url:'/users', method:'get'}
@@ -61,8 +70,19 @@ Settings passed to BearerJS:
 * tokenURL: We will add this route for POST method as end point for user authentication to generate token
 * createToken: Use this function to generate any token content you might need. Token will be encrypted and sent back as response from tokenURL request
 * validateToken: This method will provide you with decrypted token from request. Use it wizely to verify that it is ok
-* afterAuthorized: Sometimes you will not want to rely only on token validation. Once request is validated using token, you do additional check (perhaps check status in db etc.)
+* onTokenValid: Sometimes you will not want to rely only on token validation. Once request is validated using token, you do additional check (perhaps check status in db etc.)
+* onAuthenticated: In case you want to do something when request is authenticated (ex. log something)
+* onUnauthorized: In case that you want to do something when request is not authenticated
 * secureRoutes: Just add routes you want to have secured
+
+Your TOKEN will be added to request and you can access it in any other action later. For example:
+
+```javascript
+router.get('/someroute', function(req, res) {
+  console.log(req.authToken);
+  res.send('Respond with a resource');
+});
+```
 
 On your Client app
 ------------------
