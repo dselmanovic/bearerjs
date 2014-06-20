@@ -12,7 +12,7 @@ You can find fully functional demo at:
 https://github.com/dselmanovic/BearerJSDemo.git
 ```
 
-On your NodeJS app
+In your NodeJS app
 ------------------
 In your ExpressJS application init script, add the following before setting any other route. You will notice that you are free to create token content as you like.
 
@@ -64,7 +64,8 @@ bearer({
         console.log("this will be executed if request fails authentication");
     },
     secureRoutes:[
-        {url:'/users', method:'get'}
+        {url:'/secure', method:'get'},
+        {url:'/secure/*', method:'get'}
     ]
 });
 ```
@@ -74,11 +75,11 @@ Settings passed to BearerJS:
 * serverKey: This is token encryption key. PLEASE PLEASE chnage it in your application
 * tokenURL: We will add this route for POST method as end point for user authentication to generate token
 * createToken: Use this function to generate any token content you might need. Token will be encrypted and sent back as response from tokenURL request
-* validateToken: This method will provide you with decrypted token from request. Use it wizely to verify that it is ok
+* validateToken: This method will provide you with decrypted token from request. Use it wisely to verify that it is ok
 * onTokenValid: Sometimes you will not want to rely only on token validation. Once request is validated using token, you do additional check (perhaps check status in db etc.)
 * onAuthorized: In case you want to do something when request is authenticated (ex. log something)
 * onUnauthorized: In case that you want to do something when request is not authenticated
-* secureRoutes: Just add routes you want to have secured
+* secureRoutes: Just add routes you want to have secured. You can use "*" to define pattern
 
 Your TOKEN will be added to request and you can access it in any other action later. For example:
 
@@ -89,7 +90,7 @@ router.get('/someroute', function(req, res) {
 });
 ```
 
-On your Client app
+In your Client app
 ------------------
 You need to get your token first. Probably during application startup or login
 

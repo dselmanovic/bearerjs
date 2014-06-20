@@ -1,12 +1,24 @@
 //Authentication setup
 var CryptoJS = require('node-cryptojs-aes').CryptoJS;
 
+function matchPath(mask, path){
+    mask=mask.toLowerCase();
+    path=path.toLowerCase();
+    var maskArray=mask.split("/");
+    var pathArray=path.split("/");
+    if (maskArray.length!=pathArray.length) return false;
+    for (var i= 0; i<maskArray.length; i++){
+        if ((maskArray[i]!="*") && (pathArray[i]!=maskArray[i])) return false;
+    }
+    return true;
+}
+
+//Check if route should be authorized
 function checkUrl(url, method, routes){
+    method=method.toLowerCase();
     for (var i=0; i<routes.length; i++){
         var route=routes[i];
-        if ((url==route.url) && (method==route.method)){
-            return true;
-        }
+        if ((matchPath(route.url,url)) && (method==route.method)) return true;
     }
     return false;
 }
