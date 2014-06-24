@@ -57,6 +57,12 @@ bearer({
         //Returning false from this method will reject user even if his token is OK
         return true;
     },
+    userInRole:function(token, role){
+        //Provide role level access restrictions on url
+        //You can use onTokenValid for this also, but I find this easier to read later
+        //If you specified "roles" property for any secureRoute below, you must implement this method
+        return true;
+    },
     onAuthorized: function(req, token){
         console.log("this will be executed if request is OK");
     },
@@ -65,7 +71,8 @@ bearer({
     },
     secureRoutes:[
         {url:'/secure', method:'get'},
-        {url:'/secure/*', method:'get'}
+        {url:'/secure', method:'post', roles:["admin"]},
+        {url:'/secure/*', method:'get'} //any action under /secure route but NOT default "/secure" route
     ]
 });
 ```
@@ -77,9 +84,10 @@ Settings passed to BearerJS:
 * createToken: Use this function to generate any token content you might need. Token will be encrypted and sent back as response from tokenURL request
 * validateToken: This method will provide you with decrypted token from request. Use it wisely to verify that it is ok
 * onTokenValid: Sometimes you will not want to rely only on token validation. Once request is validated using token, you do additional check (perhaps check status in db etc.)
+* userInRole: Use this method to provide information if user is in a role that is required for accessing some url (check secureRoutes configuration)
 * onAuthorized: In case you want to do something when request is authenticated (ex. log something)
 * onUnauthorized: In case that you want to do something when request is not authenticated
-* secureRoutes: Just add routes you want to have secured. You can use "*" to define pattern
+* secureRoutes: Just add routes you want to have secured. You can use "*" to define pattern. Add "roles" array to specify allowed roles. If no roles are defined access will be granted to any authorized user
 
 Your TOKEN will be added to request and you can access it in any other action later. For example:
 

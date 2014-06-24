@@ -1,6 +1,6 @@
 {
   "name": "bearer",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "Bearer authentication module using token and Authorization HTTP header",
   "main": "bearer.js",
   "scripts": {

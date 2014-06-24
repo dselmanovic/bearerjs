@@ -13,12 +13,12 @@ function matchPath(mask, path){
     return true;
 }
 
-//Check if route should be authorized
+//Check if route should be authorized and return route setting
 function checkUrl(url, method, routes){
     method=method.toLowerCase();
     for (var i=0; i<routes.length; i++){
         var route=routes[i];
-        if ((matchPath(route.url,url)) && (method==route.method)) return true;
+        if ((matchPath(route.url,url)) && (method==route.method)) return route;
     }
     return false;
 }
@@ -67,11 +67,12 @@ function bearerJS(settings) {
         }
         var isAuthenticated=false;
         var errorMessage="";
-        if (checkUrl(req.url,req.method.toLowerCase(),settings.secureRoutes)){
+        var routeCheck=checkUrl(req.url,req.method.toLowerCase(),settings.secureRoutes);
+        if (routeCheck){
             if (token){
                 var tokenValid=settings.validateToken(req,token);
                 if (!tokenValid){
-                    errorMessage="Token expored";
+                    errorMessage="Token expired";
                 }else //Authorized request
                 {
                     if (settings.onTokenValid){
@@ -80,11 +81,37 @@ function bearerJS(settings) {
                             errorMessage="User disabled";
                         }else
                         {
-                            isAuthenticated=true;
+                            if (routeCheck.roles){ //if there is a Role based limit to request
+                                errorMessage="User role rejected";
+                                isAuthenticated=false;
+
+                                for (var i=0; i<routeCheck.roles.length; i++){
+                                    if (settings.userInRole(token, routeCheck.roles[i])){
+                                        isAuthenticated=true;
+                                        break;
+                                    }
+                                }
+                            }else
+                            {
+                                isAuthenticated=true;
+                            }
                         }
                     }else
                     {
-                        isAuthenticated=true;
+                        if (routeCheck.roles){ //if there is a Role based limit to request
+                            errorMessage="User role rejected";
+                            isAuthenticated=false;
+
+                            for (var i=0; i<routeCheck.roles.length; i++){
+                                if (settings.userInRole(token, routeCheck.roles[i])){
+                                    isAuthenticated=true;
+                                    break;
+                                }
+                            }
+                        }else
+                        {
+                            isAuthenticated=true;
+                        }
                     }
                 }
             }else
@@ -110,7 +137,7 @@ function bearerJS(settings) {
             if (settings.onUnauthorized){
                 settings.onUnauthorized(req,token);
             }
-            res.send();
+            res.send({error:errorMessage});
         }
     });
 }
