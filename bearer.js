@@ -34,26 +34,6 @@ function decryptToken(settings){
 }
 
 function bearerJS(settings) {
-    //get token value
-    settings.app.post(settings.tokenUrl, function (req, res) {
-        var token=settings.createToken(req);
-        if (token){
-            var encrypted = CryptoJS.AES.encrypt(JSON.stringify(token), settings.serverKey);
-            var bearer=encrypted.toString();
-
-            var jsonToken={
-                access_token:bearer,
-                expDate:token.expire
-            };
-
-            res.send(jsonToken);
-        }else
-        {
-            res.statusCode=401;
-            res.send({});
-        }
-    });
-
     //Check if URL should be authenticated and redirect accordingly
     settings.app.use(function (req, res, next) {
         var bearer=req.get('Authorization');
@@ -65,80 +45,104 @@ function bearerJS(settings) {
                 serverKey:settings.serverKey
             });
         }
-        var isAuthenticated=false;
-        var errorMessage="";
-        var routeCheck=checkUrl(req.url,req.method.toLowerCase(),settings.secureRoutes);
-        if (routeCheck){
-            if (token){
-                var tokenValid=settings.validateToken(req,token);
-                if (!tokenValid){
-                    errorMessage="Token expired";
-                }else //Authorized request
-                {
-                    if (settings.onTokenValid){
-                        var canProceed=settings.onTokenValid(token);
-                        if (!canProceed){
-                            errorMessage="User disabled";
-                        }else
-                        {
-                            if (routeCheck.roles){ //if there is a Role based limit to request
-                                errorMessage="User role rejected";
-                                isAuthenticated=false;
 
-                                for (var i=0; i<routeCheck.roles.length; i++){
-                                    if (settings.userInRole(token, routeCheck.roles[i])){
-                                        isAuthenticated=true;
-                                        break;
-                                    }
-                                }
-                            }else
-                            {
-                                isAuthenticated=true;
-                            }
-                        }
-                    }else
-                    {
-                        if (routeCheck.roles){ //if there is a Role based limit to request
-                            errorMessage="User role rejected";
-                            isAuthenticated=false;
-
-                            for (var i=0; i<routeCheck.roles.length; i++){
-                                if (settings.userInRole(token, routeCheck.roles[i])){
-                                    isAuthenticated=true;
-                                    break;
-                                }
-                            }
-                        }else
-                        {
-                            isAuthenticated=true;
-                        }
-                    }
-                }
-            }else
-            {
-                errorMessage="Invalid token";
-            }
-        }else
-        {
-            isAuthenticated=true;
-        }
-
-        if (isAuthenticated){
+        var proceed=function(){
             req.authToken=token;
             req.isAuthenticated=true;
             if (settings.onAuthorized){
                 settings.onAuthorized(req,token);
             }
             next();
-        }else
-        {
-            res.statusCode=401;
+        };
+
+        var cancel=function(statusCode, errorMessage){
+            res.statusCode=(statusCode || 401);
             res.statusText=errorMessage;
             if (settings.onUnauthorized){
                 settings.onUnauthorized(req,token);
             }
             res.send({error:errorMessage});
+        };
+
+        var isAuthenticated=false;
+        var routeCheck=checkUrl(req.url,req.method.toLowerCase(),settings.secureRoutes);
+        if (routeCheck){
+            if (token){
+                var tokenValid=settings.validateToken(req,token);
+                if (!tokenValid){
+                    cancel(401, "Token expired");
+                }else //Authorized request
+                {
+                    if (settings.onTokenValid){
+                        settings.onTokenValid(token, function(){
+                            if (routeCheck.roles){ //if there is a Role based limit to request
+                                settings.userInRole(token, routeCheck.roles, function(){proceed()}, function(){cancel(401,"User role rejected")});
+                            }else
+                            {
+                                proceed();
+                            }
+                        }, function(){cancel(401, "User disabled")});
+                    }else
+                    {
+                        if (routeCheck.roles){ //if there is a Role based limit to request
+                            settings.userInRole(token, routeCheck.roles, function(){proceed()}, function(){cancel(401,"User role rejected")});
+                        }else
+                        {
+                            proceed();
+                        }
+                    }
+                }
+            }else
+            {
+                cancel(401,"Invalid token");
+            }
+        }else
+        {
+            proceed();
         }
+    });
+
+    //Extend existing token without validating password again
+    settings.app.post(settings.extendTokenUrl, function (req, res) {
+        var proceed=function(token){
+            var encrypted = CryptoJS.AES.encrypt(JSON.stringify(token), settings.serverKey);
+            var bearer=encrypted.toString();
+
+            var jsonToken={
+                access_token:bearer,
+                expDate:token.expire
+            };
+
+            res.send(jsonToken);
+        }
+
+        var cancel=function(){
+            res.statusCode=401;
+            res.send({error:"Token not provided"});
+        };
+
+        settings.extendToken(req, function(token){proceed(token);}, function () {cancel()});
+    });
+
+    //get token value
+    settings.app.post(settings.tokenUrl, function (req, res) {
+        var proceed=function(token){
+            var encrypted = CryptoJS.AES.encrypt(JSON.stringify(token), settings.serverKey);
+            var bearer=encrypted.toString();
+
+            var jsonToken={
+                access_token:bearer,
+                expDate:token.expire
+            };
+
+            res.send(jsonToken);
+        }
+
+        var cancel=function(){
+            res.statusCode=401;
+            res.send({error:"Login failed"});
+        };
+        settings.createToken(req,function(token){proceed(token);},function(){cancel()});
     });
 }
 
