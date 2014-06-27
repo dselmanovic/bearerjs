@@ -12,6 +12,12 @@ You can find fully functional demo at:
 https://github.com/dselmanovic/BearerJSDemo
 ```
 
+Or more advanced demo with database connection at:
+```
+https://github.com/dselmanovic/RestApiStack
+```
+Thanks to [Brian Carlson](https://github.com/brianc) for help with connection to PostgreSQL
+
 In your NodeJS app
 ------------------
 In your ExpressJS application init script, add the following before setting any other route. You will notice that you are free to create token content as you like.
