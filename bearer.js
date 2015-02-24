@@ -4,6 +4,8 @@ var CryptoJS = require('node-cryptojs-aes').CryptoJS;
 function matchPath(mask, path){
     mask=mask.toLowerCase();
     path=path.toLowerCase();
+    if (path.indexOf("?")>0)
+        path=path.substring(0, path.indexOf("?"));    
     var maskArray=mask.split("/");
     var pathArray=path.split("/");
     if (maskArray.length!=pathArray.length) return false;
