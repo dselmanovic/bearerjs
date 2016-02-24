@@ -4,6 +4,10 @@ BearerJS
 NodeJS/ExpressJS module for Bearer/Token authentication.
 Often used for RESTful API, Smartphones etc to authenticate users without active session
 
+Backward compatibility remark for version 0.0.19
+=====
+`onUnauthorized` function does not automatically send the response. You will need to handle it (see example below)
+
 Usage
 =====
 
@@ -34,6 +38,7 @@ bearer({
     serverKey:"12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678",
     tokenUrl:'/token', //Call this URL to get your token. Accepts only POST method
     extendTokenUrl:'/extendtoken', //Call this URL to get your token. Accepts only POST method
+    cookieName:'x-auth', //default name for getting token from cookie when not found in Authorization header
     createToken:function(req, next, cancel){
         //If your user is not valid just return "underfined" from this method.
         //Your token will be added to req object and you can use it from any method later
@@ -52,7 +57,7 @@ bearer({
                 moreData: 'Some more data you need'
             });
         }else{
-            cancel();
+            cancel({code:1000, message: 'I do not like you'});
         }
     },
     extendToken:function(req, next, cancel){
@@ -102,11 +107,12 @@ bearer({
             cancel();
         }
     },
-    onAuthorized: function(req, token){
+    onAuthorized: function(req, token, res){
         //console.log("this will be executed if request is OK");
     },
-    onUnauthorized: function(req, token){
+    onUnauthorized: function(req, token, res, errorMessage){
         //console.log(req.path, "this will be executed if request fails authentication");
+        //res.send({error:errorMessage});
     },
     secureRoutes:[
         {url:'/secure', method:'get'},

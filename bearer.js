@@ -38,7 +38,10 @@ function decryptToken(settings){
 function bearerJS(settings) {
     //Check if URL should be authenticated and redirect accordingly
     settings.app.use(function (req, res, next) {
-        var bearer=req.get('Authorization');
+        //var bearer=req.get('Authorization');
+
+        var bearer = req.get('Authorization') || req.cookies['' + settings.cookieName + ''];
+        
         var token;
         if (bearer){
             bearer=bearer.replace('Bearer ','');
@@ -52,7 +55,7 @@ function bearerJS(settings) {
             req.authToken=token;
             req.isAuthenticated=true;
             if (settings.onAuthorized){
-                settings.onAuthorized(req,token);
+                settings.onAuthorized(req, token, res);
             }
             next();
         };
@@ -61,9 +64,10 @@ function bearerJS(settings) {
             res.statusCode=(statusCode || 401);
             res.statusText=errorMessage;
             if (settings.onUnauthorized){
-                settings.onUnauthorized(req,token);
+                settings.onUnauthorized(req, token, res, errorMessage);
+            }else{
+                res.send({error:errorMessage});
             }
-            res.send({error:errorMessage});
         };
 
         var isAuthenticated=false;
@@ -140,11 +144,14 @@ function bearerJS(settings) {
             res.send(jsonToken);
         }
 
-        var cancel=function(){
+        var cancel=function(data){
             res.statusCode=401;
-            res.send({error:"Login failed"});
+            res.send({
+                error:"Login failed",
+                data:data
+            });
         };
-        settings.createToken(req,function(token){proceed(token);},function(){cancel()});
+        settings.createToken(req,function(token){proceed(token);},function(data){cancel(data)});
     });
 }
 
