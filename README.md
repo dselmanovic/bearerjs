@@ -112,7 +112,7 @@ bearer({
     },
     onUnauthorized: function(req, token, res, errorMessage){
         //console.log(req.path, "this will be executed if request fails authentication");
-        //res.send({error:errorMessage});
+        res.send({error:errorMessage});
     },
     secureRoutes:[
         {url:'/secure', method:'get'},
